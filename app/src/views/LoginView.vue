@@ -26,6 +26,7 @@ type Form = typeof form.value
 const form = ref({
   username: '',
   password: '',
+  otp: '',
 })
 const fields = {
   username: {
@@ -56,8 +57,8 @@ const fields = {
 const { v, onSubmit, serverErrors } = useForm(form, fields)
 
 const onLogin = onSubmit((onError) => {
-  const { username, password } = form.value
-  const credentials = [username, password].join(':')
+  const { username, password, otp } = form.value
+  const credentials = [username, `${password}${otp ? ':' + otp : ''}`].join(':')
   login(credentials)
     .then(() => {
       currentUser.value = username
@@ -91,6 +92,17 @@ const onLogin = onSubmit((onError) => {
     :validations="v"
     @submit="onLogin"
   >
+    <FormField
+      v-model="form.otp"
+      component="InputItem"
+      label="Two-Factor Code"
+      :rules="{ required: false }"
+      :cProps="{
+        type: 'number',
+        placeholder: '123456',
+        autocomplete: 'one-time-code'
+      }"
+    />
     <template #buttons>
       <!-- FIXME should we remove the disabled state? -->
       <BButton
